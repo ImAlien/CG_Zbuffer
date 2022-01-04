@@ -117,11 +117,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="defs.h" />
+    <ClInclude Include="frame.h" />
     <ClInclude Include="glut.h" />
     <ClInclude Include="obj.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="frame.cpp" />
+    <ClCompile Include="func.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="obj.cpp" />
   </ItemGroup>

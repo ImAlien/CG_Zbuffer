@@ -6,6 +6,7 @@
 
 #include "obj.h"
 #include "tiny_obj_loader.h"
+#include "defs.h"
 #include <algorithm>
 using namespace std;
 void Obj::loadFile(string filename) {
@@ -90,6 +91,47 @@ void Obj::loadFile(string filepath, string filename) {
 			faces.push_back(cur_face);
 			// per-face material
 			shapes[s].mesh.material_ids[f];
+		}
+	}
+	int idx = 0;
+	for (Face f : faces) {
+		idSort.push_back(make_pair(f.y_max, idx++) );
+	}
+	sort(idSort.begin(), idSort.end(), [&](const pair<double, int>& a,const pair<double, int>& b) {
+		return a.first > b.first;
+	});
+}
+void Obj::createTable() {
+	nodeActivePolygon* pre = nullptr;// 前一个y_max的分类多边形链表
+	int pre_y_max = -1;
+	for (auto t : idSort) {
+		double y = t.first, id = t.second;
+		Face& face = faces[id];
+		nodeActivePolygon* cur = new nodeActivePolygon();// 当前的分类多边形链表节点
+		Vec4 factor = calFactor(face.points);//计算a,b, c, d;
+		cur->a = factor.a;
+		cur->b = factor.b;
+		cur->c = factor.c;
+		cur->d = factor.d;
+		if (cur->c < 1e-8 && cur->c > -1e-8) continue;//垂直于投影xOy面的面不考虑
+		int windowy_max = transfer(face.y_max);
+		int windowy_min = transfer(face.y_min);
+		int dy = windowy_max - windowy_min + 1;//dy
+		cur->dy = dy;
+		cur->id = id;//id
+		for (int i = 0, n = face.points.size(); i < n; i++) {//处理每条边
+			Point& u = face.points[i];
+			Point& v = face.points[(i + 1) % n];
+			WPoint A = transfer(u), B = transfer(v);
+			if (A.y < B.y) {
+				WPoint t = B;
+				B = A;
+				A = t;
+			}
+		}
+		if (windowy_max == pre_y_max) {
+			pre->next = cur;
+			pre = cur;
 		}
 	}
 }
