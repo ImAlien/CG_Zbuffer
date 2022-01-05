@@ -15,17 +15,11 @@ public:
 			buffer_array.resize(w*h*3, 0);
 		}
 	}
-
-	//---初使化帧缓存----
-	void Memset(int value) {
-		memset(&buffer_array[0], value, buffer_array.size());
-	}
-
 	//---返回要写入的帧缓存位置-----
 	int cal(int x, int y, int c) {
 		return (y * w + x)*3+ c;
 	}
-	void SetPixel(int x, int y, Color& color) {
+	void setPixel(int x, int y, Color& color) {
 		if (x < 0 || x >= w || y < 0 || y >= h) return;
 		buffer_array[cal(x, y, 0)] = color.r;
 		buffer_array[cal(x, y, 1)] = color.b;

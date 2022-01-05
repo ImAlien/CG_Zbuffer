@@ -2,8 +2,10 @@
 #include <gl/glut.h>
 #include <vector>
 #include <algorithm>
-
+#include <map>
+#include <string>
 extern int WINDOW_HEIGHT, WINDOW_WIDTH;
+
 struct Vector3{
 	GLdouble x, y,z;
 	Vector3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
@@ -27,8 +29,10 @@ struct Color {
 	GLubyte r, b, g;
 	Color() :r(0), b(0), g(0) {};
 	Color(int r_, int b_, int g_) :r(r_), b(b_), g(g_) {}
+	Color(double R, double B, double G) :r(GLubyte(R)), b(GLubyte(B)), g(GLubyte(G)) {};
 };
 typedef struct Color Color;
+extern Color EDGE_COLOR;
 
 struct Face {
 	std::vector<Point> points;
@@ -64,7 +68,14 @@ struct nodeActivePolygon { // 活化多边形
 	GLint dy;
 	Color color;
 	nodeActivePolygon* next;
-	nodeActivePolygon() :a(0), b(0), c(0), d(0), id(-1), dy(-1), color(0, 0, 0), next(nullptr) {};
+	nodeActivePolygon* pre;
+	nodeActivePolygon() :a(0), b(0), c(0), d(0), id(-1), dy(-1), color(0, 0, 0), next(nullptr),pre(nullptr) {};
+	nodeActivePolygon(nodeClassifiedPolygon* t) {
+		a = t->a, b = t->b, c = t->c, d = t->d;
+		id = t->id;
+		dy = t->dy - 1;
+		color = t->color;
+	}
 };
 
 struct nodeActiveEdgePair { //活化边对
@@ -80,6 +91,7 @@ struct nodeActiveEdgePair { //活化边对
 	GLint id;
 	Color color;
 	nodeActiveEdgePair* next;
+	nodeActiveEdgePair* pre;
 };
 
 // func.cpp
@@ -88,8 +100,43 @@ WPoint transfer(Point& p);
 Vec3 cross(Vec3& v1, Vec3& v2);
 WPoint cross(WPoint& v1, WPoint& v2);
 Vec4 calFactor(std::vector<Point>& points);
+Color getColor(Vec4& v);
 
+//zbuffer.cpp
+extern std::vector<nodeClassifiedPolygon*> PolygonTable;
+extern std::vector<nodeClassifiedPolygon*> PolygonTableTail;
+extern std::vector<nodeClassifiedEdge*> EdgeTable;
+extern std::vector<nodeClassifiedEdge*> EdgeTableTail;
+extern std::vector<float> zbuffer_array;
+extern nodeActivePolygon* activePolygonHead;
+extern nodeActivePolygon* activePolygonTail;
+extern nodeActiveEdgePair* activeEdgePairHead;
+extern nodeActiveEdgePair* activeEdgePairTail;
+extern std::map<int, nodeClassifiedPolygon*> id2Polygon;
 
+void zbufferInit();
 void zbuffer();
+void addActive(int y);
+void addActiveEdge(int y, nodeClassifiedPolygon* pCP);
+void updateFrameBuffer(int y);
+void updateActivePolygonTable(int y);
+void updateActiveEdgeTable(int y);
 
+//nodelist.cpp
+void addToPolygonTail(nodeActivePolygon* p);
+void addToEdgePairTail(nodeActiveEdgePair* p);
+void deletePolygon(nodeActivePolygon* p);
+void deleteEdge(nodeActiveEdgePair* p);
+//clear.cpp
 void clearData();
+void clearClassifiedPolygon();
+void clearClassifiedEdge();
+void clearActivePolygonTable();//清空活化多边形表
+void clearActiveEdgeTable();//清空活化边表
+
+//test.cpp
+void traversePolygonTable();
+void traverseEdgeTable();
+void print(std::string s);
+void traverseActivePolygon(int y);
+void traverseActiveEdge(int y);

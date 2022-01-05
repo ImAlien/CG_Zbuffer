@@ -21,8 +21,8 @@ WPoint cross(WPoint& v1, WPoint& v2) {
 Vec4 calFactor(vector<Point>& points) {
 	Vec4 ans;
 	Point& A = points[0];
-	Vec3 v1 = points[0] - points[1];
-	Vec3 v2 = points[2] - points[2];
+	Vec3 v1 = points[1] - points[0];
+	Vec3 v2 = points[2] - points[1];
 	Vec3 v3 = cross(v1, v2);
 	ans.a = v3.x;
 	ans.b = v3.y;
@@ -39,4 +39,14 @@ Vec3 operator +(const Vec3& A, const Vec3 B) //给结构体定义加法；
 Vec3 operator - (const Vec3& A, const Vec3 B) //给结构体定义减法； 
 {
 	return Vec3(A.x - B.x, A.y - B.y, A.z - B.y);
+}
+
+Color getColor(Vec4& v) {
+	//根据平面法向量与z轴（不分正反向）的夹角
+	//夹角由小到大，颜色由明到暗
+	v.a = fabs(v.a);
+	v.b = fabs(v.b);
+	v.c = fabs(v.c);
+	GLdouble costheta = v.c / sqrt(v.a + v.b + v.c);
+	return Color( 255 * costheta, 255 * costheta, 255 * costheta);
 }

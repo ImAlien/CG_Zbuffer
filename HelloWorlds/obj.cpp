@@ -8,7 +8,15 @@
 #include "tiny_obj_loader.h"
 #include "defs.h"
 #include <algorithm>
+
 using namespace std;
+
+extern vector<nodeClassifiedPolygon*> PolygonTable;
+extern vector<nodeClassifiedPolygon*> PolygonTableTail;
+extern vector<nodeClassifiedEdge*> EdgeTable;
+extern vector<nodeClassifiedEdge*> EdgeTableTail;
+
+
 void Obj::loadFile(string filename) {
 	int n = filename.size();
 	int idx = -1;
@@ -102,17 +110,22 @@ void Obj::loadFile(string filepath, string filename) {
 	});
 }
 void Obj::createTable() {
-	nodeActivePolygon* pre = nullptr;// 前一个y_max的分类多边形链表
 	int pre_y_max = -1;
+	int cnt = 0;
 	for (auto t : idSort) {
+		cnt++;
 		double y = t.first, id = t.second;
 		Face& face = faces[id];
-		nodeActivePolygon* cur = new nodeActivePolygon();// 当前的分类多边形链表节点
+		nodeClassifiedPolygon* cur = new nodeClassifiedPolygon();// 当前的分类多边形链表节点
 		Vec4 factor = calFactor(face.points);//计算a,b, c, d;
+
 		cur->a = factor.a;
 		cur->b = factor.b;
 		cur->c = factor.c;
 		cur->d = factor.d;
+		cur->color = getColor(factor);
+		cur->next = nullptr;
+		//cout << cur->a << ' ' << cur->b << ' ' <<cur->c<<' '  << cur->d << endl;
 		if (cur->c < 1e-8 && cur->c > -1e-8) continue;//垂直于投影xOy面的面不考虑
 		int windowy_max = transfer(face.y_max);
 		int windowy_min = transfer(face.y_min);
@@ -128,10 +141,24 @@ void Obj::createTable() {
 				B = A;
 				A = t;
 			}
+			nodeClassifiedEdge* edge = new nodeClassifiedEdge();
+			edge->x = A.x;
+			edge->dy = A.y - B.y + 1;
+			edge->dx = (B.x - A.x)*1.0 / (A.y - B.y);
+			edge->id = id;
+			edge->used = false;
+			edge->next = nullptr;
+			//加入分类边表
+			EdgeTableTail[A.y]->next = edge;
+			EdgeTableTail[A.y] = edge;
 		}
-		if (windowy_max == pre_y_max) {
-			pre->next = cur;
-			pre = cur;
-		}
+		//面加入分类多边形表
+		int winY = transfer(y);
+		PolygonTableTail[winY]->next = cur;
+		PolygonTableTail[winY] = cur;
+		//id 和 面的映射
+		id2Polygon[id] = cur;
+		cnt++;
 	}
+	cout << "cnt : " << cnt << endl;
 }

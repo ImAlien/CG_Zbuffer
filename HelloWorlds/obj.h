@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 extern int WINDOW_WIDTH, WINDOW_HEIGHT;
+
 class Obj {
 public:
 	std::vector<Face> faces;

@@ -123,10 +123,14 @@
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="clear.cpp" />
     <ClCompile Include="frame.cpp" />
     <ClCompile Include="func.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="nodelist.cpp" />
     <ClCompile Include="obj.cpp" />
+    <ClCompile Include="test.cpp" />
+    <ClCompile Include="zbuffer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

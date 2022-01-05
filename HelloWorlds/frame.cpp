@@ -4,6 +4,6 @@
 extern Obj obj;
 void FrameBuffer::getFrame() {
 	obj.createTable();
-	//zbuffer();
-	//clearData();
+	zbuffer();
+	clearData();
 }
