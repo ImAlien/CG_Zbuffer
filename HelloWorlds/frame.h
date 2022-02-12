@@ -7,7 +7,7 @@ public:
 	std::vector<GLubyte> buffer_array;	// 帧缓存
 	int w, h;
 	//int m_centerX, m_centerY, m_center;
-	FrameBuffer() :w(WINDOW_WIDTH), h(WINDOW_HEIGHT) { buffer_array.resize(w*h * 3, 120); }
+	FrameBuffer() :w(WINDOW_WIDTH), h(WINDOW_HEIGHT) { buffer_array.resize(w*h * 3, 0); }
 
 	//----更新高度和宽度，并重新设置其大小
 	void ResizeBuffer(int width, int height) {
@@ -21,6 +21,7 @@ public:
 	}
 	void setPixel(int x, int y, Color& color) {
 		if (x < 0 || x >= w || y < 0 || y >= h) return;
+		//print(color);
 		buffer_array[cal(x, y, 0)] = color.r;
 		buffer_array[cal(x, y, 1)] = color.b;
 		buffer_array[cal(x, y, 2)] = color.g;

@@ -28,7 +28,7 @@ typedef struct Vector4 Vec4;
 struct Color {
 	GLubyte r, b, g;
 	Color() :r(0), b(0), g(0) {};
-	Color(int r_, int b_, int g_) :r(r_), b(b_), g(g_) {}
+	Color(int r_, int b_, int g_) :r(GLubyte(r_)), b(GLubyte(b_)), g(GLubyte(g_)) {}
 	Color(double R, double B, double G) :r(GLubyte(R)), b(GLubyte(B)), g(GLubyte(G)) {};
 };
 typedef struct Color Color;
@@ -73,7 +73,7 @@ struct nodeActivePolygon { // 活化多边形
 	nodeActivePolygon(nodeClassifiedPolygon* t) {
 		a = t->a, b = t->b, c = t->c, d = t->d;
 		id = t->id;
-		dy = t->dy - 1;
+		dy = t->dy;
 		color = t->color;
 	}
 };
@@ -95,7 +95,9 @@ struct nodeActiveEdgePair { //活化边对
 };
 
 // func.cpp
-int transfer(double x);
+int transferX(double x);
+int transferY(double x);
+int transferZ(double x);
 WPoint transfer(Point& p);
 Vec3 cross(Vec3& v1, Vec3& v2);
 WPoint cross(WPoint& v1, WPoint& v2);
@@ -137,6 +139,10 @@ void clearActiveEdgeTable();//清空活化边表
 //test.cpp
 void traversePolygonTable();
 void traverseEdgeTable();
+void traverseEdgeTable(int y);
 void print(std::string s);
+void print(Color& c);
+void print(Vec3& v);
 void traverseActivePolygon(int y);
+void traverseActivePolygonColor(int y);
 void traverseActiveEdge(int y);

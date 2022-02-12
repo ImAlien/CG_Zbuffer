@@ -8,7 +8,7 @@
 #include "tiny_obj_loader.h"
 #include "defs.h"
 #include <algorithm>
-
+extern Obj obj;
 using namespace std;
 
 extern vector<nodeClassifiedPolygon*> PolygonTable;
@@ -32,6 +32,7 @@ void Obj::loadFile(string filename) {
 	loadFile(pathname, filename.substr(idx + 1));
 }
 void Obj::loadFile(string filepath, string filename) {
+	cout << filepath <<' ' << filename << endl;
 	string inputfile = filename;
 	tinyobj::ObjReaderConfig reader_config;
 	reader_config.mtl_search_path = filepath; // Path to material files
@@ -105,14 +106,14 @@ void Obj::loadFile(string filepath, string filename) {
 	for (Face f : faces) {
 		idSort.push_back(make_pair(f.y_max, idx++) );
 	}
-	sort(idSort.begin(), idSort.end(), [&](const pair<double, int>& a,const pair<double, int>& b) {
-		return a.first > b.first;
-	});
+	obj.nface = idx;
+	//cout << "load success" << endl;
 }
 void Obj::createTable() {
 	int pre_y_max = -1;
 	int cnt = 0;
 	for (auto t : idSort) {
+		//cout << cnt << endl;
 		cnt++;
 		double y = t.first, id = t.second;
 		Face& face = faces[id];
@@ -124,36 +125,41 @@ void Obj::createTable() {
 		cur->c = factor.c;
 		cur->d = factor.d;
 		cur->color = getColor(factor);
+		//print(cur->color);
+		//cur->color = Color(255, 255, 255);
 		cur->next = nullptr;
 		//cout << cur->a << ' ' << cur->b << ' ' <<cur->c<<' '  << cur->d << endl;
 		if (cur->c < 1e-8 && cur->c > -1e-8) continue;//垂直于投影xOy面的面不考虑
-		int windowy_max = transfer(face.y_max);
-		int windowy_min = transfer(face.y_min);
+		int windowy_max = transferX(face.y_max);
+		int windowy_min = transferY(face.y_min);
 		int dy = windowy_max - windowy_min + 1;//dy
 		cur->dy = dy;
 		cur->id = id;//id
 		for (int i = 0, n = face.points.size(); i < n; i++) {//处理每条边
 			Point& u = face.points[i];
 			Point& v = face.points[(i + 1) % n];
+			//if (u.y - v.y < 1e-8 && u.y - v.y > -1e-8) continue;//水平边不考虑
 			WPoint A = transfer(u), B = transfer(v);
 			if (A.y < B.y) {
 				WPoint t = B;
 				B = A;
 				A = t;
 			}
+			//if (A.y == B.y) continue;
 			nodeClassifiedEdge* edge = new nodeClassifiedEdge();
 			edge->x = A.x;
-			edge->dy = A.y - B.y + 1;
+			edge->dy = A.y - B.y;
 			edge->dx = (B.x - A.x)*1.0 / (A.y - B.y);
 			edge->id = id;
 			edge->used = false;
 			edge->next = nullptr;
+			if (A.y == B.y && A.x != B.x) continue; //水平边不考虑
 			//加入分类边表
 			EdgeTableTail[A.y]->next = edge;
 			EdgeTableTail[A.y] = edge;
 		}
 		//面加入分类多边形表
-		int winY = transfer(y);
+		int winY = transferY(y);
 		PolygonTableTail[winY]->next = cur;
 		PolygonTableTail[winY] = cur;
 		//id 和 面的映射

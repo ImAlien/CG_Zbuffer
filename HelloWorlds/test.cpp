@@ -30,7 +30,14 @@ void traverseEdgeTable() {
 	}
 	cout << "总共" << sum << "条边" << endl;
 }
-
+void traverseEdgeTable(int y) {
+	auto p = EdgeTable[y]->next;
+	cout << "-----------------------------------" << y << "edges" << endl;
+	while (p) {
+		cout << p->x << ' ' << p->id << endl;
+		p = p->next;
+	}
+}
 void print(string s) {
 	cout << s << endl;
 }
@@ -51,4 +58,23 @@ void traverseActiveEdge(int y) {
 		p = p->next;
 	}
 	print("当前" + to_string(y) + "下总共" + to_string(cnt) + "个活化边");
+}
+
+void print(Color& c) {
+	cout << "r: " << (int)c.r << "  b:  " << (int)c.b << "  g :  " << (int)c.g << endl;
+}
+void traverseActivePolygonColor(int y) {
+	auto p = activePolygonHead->next;
+	int cnt = 0;
+	while (p != activePolygonTail) {
+		cnt++;
+		print("多边形序号:");
+		cout << cnt << ' ';
+		print(p->color);
+		p = p->next;
+	}
+}
+
+void print(Vec3& v) {
+	cout << v.x<<' ' << v.y<<' ' << v.z << endl;
 }

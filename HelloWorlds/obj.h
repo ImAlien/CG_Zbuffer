@@ -10,6 +10,7 @@ public:
 	std::vector<std::pair<double, int>> idSort;
 	double g_ymin = 1e9, g_ymax = -1e9;
 	double g_xmin = 1e9, g_xmax = -1e9;
+	int nface = 0 , nvertex = 0;
 	//int scale_size = 1;//模型根据窗口，放大与缩小的倍数
 	Obj() {}
 	Obj(std::string filename) {
