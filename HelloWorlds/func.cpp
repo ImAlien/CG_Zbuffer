@@ -80,12 +80,15 @@ Vec3 operator - (const Vec3& A, const Vec3 B) //给结构体定义减法；
 }
 
 Color getColor(Vec4& v) {
+	//GLdouble rd = rand() % 200 + 55;
+	//return Color(255,0,0);
 	v.a = fabs(v.a);
 	v.b = fabs(v.b);
 	v.c = fabs(v.c);
 	//cout << v.a << ' ' << v.b << ' ' << v.c << endl;
 	//与z轴的夹角的余弦值
-	GLdouble costheta = v.c / sqrt(v.a*v.a + v.b*v.b + v.c*v.c);
+	GLdouble len = sqrt(v.a * v.a + v.b * v.b + v.c * v.c);
+	GLdouble costheta = len > DBL_EPSILON? v.c/len : 1;
 	//GLdouble costheta = v.c / v.a + v.b + v.c;
 	//cout << 255 * costheta << 255 * costheta << 255 * costheta << endl;
 	return Color( 255 * costheta, 255 * costheta, 255 * costheta);

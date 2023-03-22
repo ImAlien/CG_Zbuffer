@@ -153,10 +153,12 @@ void Obj::createTable() {
 			edge->id = id;
 			edge->used = false;
 			edge->next = nullptr;
+			edge->y = A.y;
 			if (A.y == B.y && A.x != B.x) continue; //水平边不考虑
 			//加入分类边表
 			EdgeTableTail[A.y]->next = edge;
 			EdgeTableTail[A.y] = edge;
+			PolygonEdges[id].push_back(edge);
 		}
 		//面加入分类多边形表
 		int winY = transferY(y);

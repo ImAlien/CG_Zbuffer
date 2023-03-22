@@ -58,6 +58,7 @@ struct nodeClassifiedEdge {// 分类边
 	//COORD_TYPE e_len;//边是水平边时，e_len为非0值，否则e_len=0
 	GLint dy;
 	GLint id;
+	GLint y;
 	bool used;
 	nodeClassifiedEdge* next;
 };
@@ -70,11 +71,7 @@ struct nodeActivePolygon { // 活化多边形
 	nodeActivePolygon* next;
 	nodeActivePolygon* pre;
 	nodeActivePolygon() :a(0), b(0), c(0), d(0), id(-1), dy(-1), color(0, 0, 0), next(nullptr),pre(nullptr) {};
-	nodeActivePolygon(nodeClassifiedPolygon* t) {
-		a = t->a, b = t->b, c = t->c, d = t->d;
-		id = t->id;
-		dy = t->dy;
-		color = t->color;
+	nodeActivePolygon(nodeClassifiedPolygon* t):a(t->a), b(t->b), c(t->c), d(t->d), id(t->id),dy(t->dy), color(t->color) {
 	}
 };
 
@@ -105,6 +102,7 @@ Vec4 calFactor(std::vector<Point>& points);
 Color getColor(Vec4& v);
 
 //zbuffer.cpp
+extern std::map<int, std::vector< nodeClassifiedEdge* > > PolygonEdges;
 extern std::vector<nodeClassifiedPolygon*> PolygonTable;
 extern std::vector<nodeClassifiedPolygon*> PolygonTableTail;
 extern std::vector<nodeClassifiedEdge*> EdgeTable;

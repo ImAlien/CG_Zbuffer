@@ -5,8 +5,10 @@
 using namespace std;
 extern FrameBuffer frameBuffer;
 
-set<int> PolygonSet;
+//set<int> PolygonSet;
+int vis[100000];
 void zbuffer() {
+	memset(vis, 0, sizeof vis);
 	for (int y = WINDOW_HEIGHT - 1; y >= 0; y--) {
 		zbufferInit();
 		addActive(y);
@@ -25,7 +27,8 @@ void addActive(int y) {
 	while (pCP != nullptr) {
 		nodeActivePolygon* cur = new nodeActivePolygon(pCP);
 		addToPolygonTail(cur);
-		PolygonSet.insert(cur->id);
+		//PolygonSet.insert(cur->id);
+		vis[cur->id] = 1;
 		addActiveEdge(y, pCP);
 		pCP = pCP->next;
 	}
@@ -36,7 +39,7 @@ void addActive(int y) {
 }
 vector<nodeClassifiedEdge*> findEdges(int y, int pid) {
 	vector<nodeClassifiedEdge*> res;
-	if (PolygonSet.count(pid) == 0) return res;
+	if (vis[pid] == 0) return res;
 	nodeClassifiedEdge* pCE = EdgeTable[y]->next;
 	while (pCE != nullptr) {
 		int eid = pCE->id;
@@ -48,9 +51,9 @@ vector<nodeClassifiedEdge*> findEdges(int y, int pid) {
 	return res;
 }
 nodeClassifiedEdge* findLeftEdge(int y, int pid) {
-	if (PolygonSet.count(pid) == 0) return nullptr;
+	if (vis[pid] == 0) return nullptr;
 	nodeClassifiedEdge* res = nullptr;
-	nodeClassifiedEdge* pCE = EdgeTable[y]->next;
+	/*nodeClassifiedEdge* pCE = EdgeTable[y]->next;
 	while (pCE != nullptr) {
 		int eid = pCE->id;
 		if (eid == pid) {
@@ -59,14 +62,21 @@ nodeClassifiedEdge* findLeftEdge(int y, int pid) {
 			else if (pCE->x == res->x && pCE->dx < res->dx) res = pCE;
 		}
 		pCE = pCE->next;
+	}*/
+	for (auto edge : PolygonEdges[pid]) {
+		if (edge->y == y) {
+			if (!res) res = edge;
+			else if (edge->x < res->x) res = edge;
+			else if (edge->x == res->x && edge->dx < res->dx) res = edge;
+		}
 	}
 	return res;
 }
 nodeClassifiedEdge* findRightEdge(int y, int pid) {
-	if (PolygonSet.count(pid) == 0) return nullptr;
+	if (!vis[pid]) return nullptr;
 	nodeClassifiedEdge* res = nullptr;
 	nodeClassifiedEdge* pCE = EdgeTable[y]->next;
-	while (pCE != nullptr) {
+	/*while (pCE != nullptr) {
 		int eid = pCE->id;
 		if (eid == pid) {
 			if (res == nullptr) res = pCE;
@@ -74,6 +84,13 @@ nodeClassifiedEdge* findRightEdge(int y, int pid) {
 			else if (pCE->x == res->x && pCE->dx > res->dx) res = pCE;
 		}
 		pCE = pCE->next;
+	}*/
+	for (auto edge : PolygonEdges[pid]) {
+		if (edge->y == y) {
+			if (!res) res = edge;
+			else if (edge->x > res->x) res = edge;
+			else if (edge->x == res->x && edge->dx > res->dx) res = edge;
+		}
 	}
 	return res;
 }
@@ -97,9 +114,9 @@ void addActiveEdge(int y, nodeClassifiedPolygon* pCP) {//»î»¯¶à±ßÐÎµÄÁ½±ß¼ÓÈë»î»
 	nodeClassifiedEdge* pCE = EdgeTable[y]->next;
 	nodeClassifiedEdge* l = nullptr, *r = nullptr;
 	int pid = pCP->id;
-	vector<nodeClassifiedEdge*> find_edges = findEdges(y, pid);
+	//vector<nodeClassifiedEdge*> find_edges = findEdges(y, pid);
 	//cout << "find_deges:" << find_edges.size() << endl;
-	int n = find_edges.size();
+	//int n = find_edges.size();
 	//if (n != 2) cerr << "»î»¯¶à±ßÐÎÕÒµ½¶à¸öµã";
 	l = findLeftEdge(y, pid);
 	r = findRightEdge(y, pid);
@@ -227,9 +244,9 @@ void updateActiveEdgeTable(int y) {
 		pAEP->dyr--;
 		if (pAEP->dyl < 0 && pAEP->dyr < 0) {//×óÓÒÁ½±ßÍ¬Ê±É¨ÃèÍê
 			nodeClassifiedEdge *l, *r;
-			vector<nodeClassifiedEdge*> find_edges = findEdges(y, pAEP->id);
-			l = findLeftEdge(y, pAEP->id);
-			r = findRightEdge(y, pAEP->id);
+			//vector<nodeClassifiedEdge*> find_edges = findEdges(y, pAEP->id);
+			l = findLeftEdge(y-1, pAEP->id);
+			r = findRightEdge(y-1, pAEP->id);
 			//int n = find_edges.size();
 			if (l == nullptr && r == nullptr) {
 				//	if (find_edges.size() == 1)
@@ -313,7 +330,8 @@ void updateActivePolygonTable(int y) {
 		p->dy -= 1;
 		if (p->dy < 0)
 		{
-			PolygonSet.erase(p->id);
+			//PolygonSet.erase(p->id);
+			vis[p->id] = 0;
 			deletePolygon(p);
 			nodeActivePolygon* pre = p;
 			p = p->next;
